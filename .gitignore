@@ -1,0 +1,29 @@
+# Временные файлы
+*.pyc
+__pycache__/
+*.pot
+*.hash
+hashcat.potfile
+*.potfile
+
+# Расшифрованные файлы (не коммитим результаты)
+*_decrypted.*
+*_extracted/
+
+# Словари (большие файлы — качаются через install.sh)
+wordlists/rockyou.txt
+wordlists/*.txt
+!wordlists/README.md
+
+# Логи
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Сборки John
+.local/
