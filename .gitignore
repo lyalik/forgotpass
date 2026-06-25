@@ -10,10 +10,11 @@ hashcat.potfile
 *_decrypted.*
 *_extracted/
 
-# Словари (большие файлы — качаются через install.sh)
-wordlists/rockyou.txt
-wordlists/*.txt
-!wordlists/README.md
+# Словари: встроенный rockyou.txt (top-75, 478KB) коммитим для офлайн-работы.
+# Полные/большие словари игнорируем (качаются через install.sh --full-rockyou).
+wordlists/rockyou_full.txt
+wordlists/*.tar.gz
+wordlists/*.zip
 
 # Логи
 *.log
@@ -27,3 +28,4 @@ wordlists/*.txt
 
 # Сборки John
 .local/
+wget-log*

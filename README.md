@@ -23,11 +23,11 @@ hashcat и расшифровывает файл. Поддерживает MS Of
 ## Быстрый старт
 
 ```bash
-# 1. Клонировать
+# 1. Клонировать (rockyou.txt уже внутри — работает офлайн)
 git clone https://github.com/lyalik/forgotpass.git
 cd forgotpass
 
-# 2. Установить зависимости
+# 2. Установить зависимости (hashcat, Python-пакеты, утилиты)
 ./install.sh
 
 # 3. Восстановить пароль
@@ -58,7 +58,7 @@ python3 recover.py /path/to/file.xlsx
 | openpyxl, pypdf | Чтение расшифрованных Office/PDF |
 | qpdf | Расшифровка PDF |
 | p7zip-full, unrar, unzip | Расшифровка архивов |
-| rockyou.txt | Словарь 14M паролей |
+| rockyou.txt | Встроенный словарь (top-75, ~59k паролей) — работает офлайн |
 
 ### Без сборки John (быстрая установка)
 
@@ -68,11 +68,21 @@ python3 recover.py /path/to/file.xlsx
 ./install.sh --no-john
 ```
 
+### Полная версия словаря (опционально)
+
+Встроенный `rockyou.txt` (top-75, ~59k паролей) покрывает большинство случаев
+и работает офлайн. Для сложных паролей можно скачать полную версию (14M паролей, 133MB):
+
+```bash
+./install.sh --full-rockyou
+```
+
 ### Вручную
 
 ```bash
 sudo apt install hashcat qpdf p7zip-full unrar unzip python3-pip
 pip install --user --break-system-packages msoffcrypto-tool olefile openpyxl pypdf
+# rockyou.txt уже в репозитории (wordlists/rockyou.txt)
 ```
 
 ## Использование

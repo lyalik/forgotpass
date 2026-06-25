@@ -7,11 +7,12 @@
 #   - John the Ripper Jumbo (утилиты *2john для извлечения хэшей)
 #   - Python-зависимости (msoffcrypto-tool, openpyxl, pypdf, olefile)
 #   - Утилиты расшифровки (qpdf, p7zip-full, unrar, unzip)
-#   - Словарь rockyou.txt (если отсутствует)
+#   - Словарь rockyou.txt (встроенная версия top-75; полная через --full-rockyou)
 #
 # Запуск:
-#   ./install.sh           — полная установка
-#   ./install.sh --no-john — без сборки John the Ripper (медленнее для не-Office)
+#   ./install.sh                  — полная установка (встроенный rockyou top-75)
+#   ./install.sh --no-john        — без сборки John the Ripper (медленнее для не-Office)
+#   ./install.sh --full-rockyou   — скачать полную версию rockyou.txt (133MB, 14M паролей)
 #
 set -e
 
@@ -31,9 +32,13 @@ if [ "$EUID" -eq 0 ]; then
 fi
 
 BUILD_JOHN=true
-if [ "$1" = "--no-john" ]; then
-    BUILD_JOHN=false
-fi
+FULL_ROCKYOU=false
+for arg in "$@"; do
+    case "$arg" in
+        --no-john)       BUILD_JOHN=false ;;
+        --full-rockyou)  FULL_ROCKYOU=true ;;
+    esac
+done
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 JOHN_DIR="$HOME/.local/john"
@@ -102,18 +107,28 @@ else
 fi
 
 # --- 4. Словарь rockyou.txt ---
+# Встроенный rockyou.txt (top-75, ~59k паролей, 478KB) уже в репозитории —
+# работает офлайн. Опция --full-rockyou скачивает полную версию (133MB, 14M паролей).
 ROCKYOU="$PROJECT_DIR/wordlists/rockyou.txt"
-if [ ! -f "$ROCKYOU" ] || [ ! -s "$ROCKYOU" ]; then
-    info "Загрузка словаря rockyou.txt..."
-    mkdir -p "$PROJECT_DIR/wordlists"
-    wget -q --timeout=60 \
+ROCKYOU_FULL="$PROJECT_DIR/wordlists/rockyou_full.txt"
+
+if [ "$FULL_ROCKYOU" = true ]; then
+    info "Загрузка ПОЛНОЙ версии rockyou.txt (133MB, 14M паролей)..."
+    wget --timeout=120 --progress=dot:giga \
         "https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt" \
-        -O "$ROCKYOU" 2>&1 || warn "Не удалось скачать rockyou.txt. Скачайте вручную."
-    if [ -s "$ROCKYOU" ]; then
-        info "rockyou.txt загружен ($(wc -l < "$ROCKYOU") строк)"
+        -O "$ROCKYOU_FULL" 2>&1 | tail -3 || warn "Не удалось скачать полную версию."
+    if [ -s "$ROCKYOU_FULL" ]; then
+        info "Полная версия загружена ($(wc -l < "$ROCKYOU_FULL") строк)"
+        # Используем полную версию как основную
+        mv "$ROCKYOU_FULL" "$ROCKYOU"
     fi
 else
-    info "rockyou.txt уже есть ($(wc -l < "$ROCKYOU") строк)"
+    if [ -f "$ROCKYOU" ] && [ -s "$ROCKYOU" ]; then
+        info "rockyou.txt уже есть ($(wc -l < "$ROCKYOU") строк) — встроенная версия (top-75)"
+        info "Для полной версии (14M паролей) запустите: ./install.sh --full-rockyou"
+    else
+        warn "rockyou.txt отсутствует! Восстановите из репозитория: git checkout wordlists/rockyou.txt"
+    fi
 fi
 
 # --- 5. Проверка ---
